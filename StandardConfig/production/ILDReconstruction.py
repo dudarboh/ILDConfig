@@ -13,7 +13,7 @@ from Configurables import (
     PodioOutput,
     k4DataSvc,
 )
-from Gaudi.Configuration import INFO
+from Gaudi.Configuration import INFO, DEBUG
 from k4FWCore.parseArgs import parser
 from k4MarlinWrapper.parseConstants import parseConstants
 
@@ -163,6 +163,7 @@ CONSTANTS = {
 det_calib_constants = import_from(f"Calibration/Calibration_{det_model}.cfg").CONSTANTS
 CONSTANTS.update(det_calib_constants)
 
+
 parseConstants(CONSTANTS)
 
 
@@ -265,49 +266,6 @@ if not reco_args.trackingOnly:
 
     sequenceLoader.load("HighLevelReco/HighLevelReco")
 
-
-MyPfoAnalysis = MarlinProcessorWrapper("MyPfoAnalysis")
-MyPfoAnalysis.ProcessorType = "PfoAnalysis"
-MyPfoAnalysis.Parameters = {
-    "BCalCollections": ["BCAL"],
-    "BCalCollectionsSimCaloHit": ["BeamCalCollection"],
-    "CollectCalibrationDetails": ["0"],
-    "ECalBarrelCollectionsSimCaloHit": [CONSTANTS["ECalBarrelSimHitCollections"]],
-    "ECalCollections": [
-        "EcalBarrelCollectionRec",
-        "EcalBarrelCollectionGapHits",
-        "EcalEndcapsCollectionRec",
-        "EcalEndcapsCollectionGapHits",
-        "EcalEndcapRingCollectionRec",
-    ],
-    "ECalCollectionsSimCaloHit": [CONSTANTS["ECalSimHitCollections"]],
-    "ECalEndCapCollectionsSimCaloHit": [CONSTANTS["ECalEndcapSimHitCollections"]],
-    "ECalOtherCollectionsSimCaloHit": [CONSTANTS["ECalRingSimHitCollections"]],
-    "HCalBarrelCollectionsSimCaloHit": [CONSTANTS["HCalBarrelSimHitCollections"]],
-    "HCalCollections": [
-        "HcalBarrelCollectionRec",
-        "HcalEndcapsCollectionRec",
-        "HcalEndcapRingCollectionRec",
-    ],
-    "HCalEndCapCollectionsSimCaloHit": [CONSTANTS["HCalEndcapSimHitCollections"]],
-    "HCalOtherCollectionsSimCaloHit": [CONSTANTS["HCalRingSimHitCollections"]],
-    "LCalCollections": ["LCAL"],
-    "LCalCollectionsSimCaloHit": ["LumiCalCollection"],
-    "LHCalCollections": ["LHCAL"],
-    "LHCalCollectionsSimCaloHit": ["LHCalCollection"],
-    "LookForQuarksWithMotherZ": ["2"],
-    "MCParticleCollection": ["MCParticle"],
-    "MCPfoSelectionLowEnergyNPCutOff": ["1.2"],
-    "MCPfoSelectionMomentum": ["0.01"],
-    "MCPfoSelectionRadius": ["500."],
-    "MuonCollections": ["MUON"],
-    "MuonCollectionsSimCaloHit": ["YokeBarrelCollection", "YokeEndcapsCollection"],
-    "PfoCollection": ["PandoraPFOs"],
-    "Printing": ["0"],
-    "RootFile": [f"{reco_args.outputFileBase}_PfoAnalysis.root"],
-}
-algList.append(MyPfoAnalysis)
-
 if reco_args.lcioOutput != "only":
     # Attach the LCIO -> EDM4hep conversion to the last processor that is run
     # before the output
@@ -328,9 +286,11 @@ if reco_args.lcioOutput != "only":
 
     edm4hepOutput = PodioOutput("EDM4hepOutput")
     edm4hepOutput.filename = f"{reco_args.outputFileBase}_REC.edm4hep.root"
-    edm4hepOutput.outputCommands = ["keep *"]
-    for name in CONSTANTS["AdditionalDropCollectionsREC"].split(" "):
-        edm4hepOutput.outputCommands.append(f"drop {name}")
+    edm4hepOutput.outputCommands = ["drop *"]
+
+    collections_to_keep = "MCParticles PandoraPFOs PandoraClusters LHCAL LCAL MUON EcalBarrelCollectionRec EcalBarrelCollectionGapHits EcalEndcapsCollectionRec EcalEndcapsCollectionGapHits EcalEndcapRingCollectionRec HcalBarrelCollectionRec HcalEndcapsCollectionRec HcalEndcapRingCollectionRec"
+    for name in collections_to_keep.split(" "):
+        edm4hepOutput.outputCommands.append(f"keep {name}")
 
     algList.append(edm4hepOutput)
 
@@ -345,42 +305,8 @@ if reco_args.lcioOutput in ("on", "only"):
         "LCIOWriteMode": ["WRITE_NEW"],
     }
 
-    DSTOutput = MarlinProcessorWrapper("DSTOutput")
-    DSTOutput.ProcessorType = "LCIOOutputProcessor"
-    DSTOutput.Parameters = {
-        "CompressionLevel": ["6"],
-        "DropCollectionNames": ["PandoraPFANewStartVertices"],
-        "DropCollectionTypes": [
-            "MCParticle",
-            "SimTrackerHit",
-            "SimCalorimeterHit",
-            "TrackerHit",
-            "TrackerHitPlane",
-            "CalorimeterHit",
-            "LCRelation",
-            "Track",
-            "LCFloatVec",
-        ],
-        "FullSubsetCollections": ["MCParticlesSkimmed"],
-        "KeepCollectionNames": [
-            "MCParticlesSkimmed",
-            "MarlinTrkTracks",
-            "MarlinTrkTracksProton",
-            "MarlinTrkTracksKaon",
-            "MCTruthMarlinTrkTracksLink",
-            "MarlinTrkTracksMCTruthLink",
-            "RecoMCTruthLink",
-            "MCTruthRecoLink",
-            "MCTruthClusterLink",
-            "ClusterMCTruthLink",
-        ],
-        "LCIOOutputFile": [f"{reco_args.outputFileBase}_DST.slcio"],
-        "LCIOWriteMode": ["WRITE_NEW"],
-    }
-
     algList.append(MyLCIOOutputProcessor)
-    algList.append(DSTOutput)
 
 ApplicationMgr(
-    TopAlg=algList, EvtSel="NONE", EvtMax=3, ExtSvc=svcList, OutputLevel=INFO
+    TopAlg=algList, EvtSel="NONE", EvtMax=-1, ExtSvc=svcList, OutputLevel=INFO
 )
