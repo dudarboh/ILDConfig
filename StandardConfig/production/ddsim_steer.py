@@ -12,21 +12,21 @@ import os
 SIM = DD4hepSimulation()
 
 ## The compact XML file
-SIM.compactFile = ""
+SIM.compactFile = os.path.join(os.environ.get("k4geo_DIR"), "ILD/compact/ILD_l5_o1_v02/ILD_l5_o1_v02.xml") # NOTE: MODIFIED
 ## Lorentz boost for the crossing angle, in radian!
 SIM.crossingAngleBoost = 7.e-3*rad
 SIM.enableDetailedShowerMode = True
 SIM.enableG4GPS = False
 SIM.enableG4Gun = False
-SIM.enableGun = False
+SIM.enableGun = True # NOTE: MODIFIED
 ## InputFiles for simulation .stdhep, .slcio, .HEPEvt, .hepevt, .hepmc, .pairs files are supported
 SIM.inputFiles = []
 ## Macro file to execute for runType 'run' or 'vis'
 SIM.macroFile = ""
 ## number of events to simulate, used in batch mode
-SIM.numberOfEvents = 3
+SIM.numberOfEvents = 1000 # takes about 1sec per event and 40 Mb for my purposes
 ## Outputfile from the simulation,only lcio output is supported
-SIM.outputFile = "dummyOutput.slcio"
+SIM.outputFile = "dummyOutput.edm4hep.root"
 ## Physics list to use in simulation
 SIM.physicsList = None
 ## Verbosity use integers from 1(most) to 7(least) verbose
@@ -45,7 +45,7 @@ SIM.steeringFile = None
 ## FourVector of translation for the Smearing of the Vertex position: x y z t
 SIM.vertexOffset = [0.0, 0.0, 0.0, 0.0]
 ## FourVector of the Sigma for the Smearing of the Vertex position: x y z t
-SIM.vertexSigma = [0.0, 0.0, 0.0, 0.0]
+SIM.vertexSigma = [150.0*mm, 0.0, 470.0*mm, 0.0] #NOTE: MODIFIED
 
 
 ################################################################################
@@ -160,7 +160,7 @@ SIM.guineapig.particlesPerEvent = "-1"
 ################################################################################
 
 ##  direction of the particle gun, 3 vector 
-SIM.gun.direction = (0, 0, 1)
+SIM.gun.direction = (0, 1, 0) # NOTE: MODIFIED
 
 ## choose the distribution of the random direction for theta
 ## 
@@ -174,7 +174,9 @@ SIM.gun.direction = (0, 0, 1)
 ##     Setting a distribution will set isotrop = True
 ##     
 SIM.gun.distribution = None
-SIM.gun.energy = 10000.0
+SIM.gun.energy = None # NOTE:MODIFIED
+SIM.gun.momentumMin = 500.*MeV # NOTE:MODIFIED
+SIM.gun.momentumMax = 20000.*MeV # NOTE:MODIFIED
 
 ##  isotropic distribution for the particle gun
 ## 
@@ -183,14 +185,14 @@ SIM.gun.energy = 10000.0
 ##     
 SIM.gun.isotrop = False
 SIM.gun.multiplicity = 1
-SIM.gun.particle = "mu-"
+SIM.gun.particle = "pi-" # NOTE: MODIFIED
 SIM.gun.phiMax = None
 
 ## Minimal azimuthal angle for random distribution
 SIM.gun.phiMin = None
 
 ##  position of the particle gun, 3 vector 
-SIM.gun.position = (0.0, 0.0, 0.0)
+SIM.gun.position = (0.0, (1804.8-10.)*mm, 0.0) # NOTE: MODIFIED
 SIM.gun.thetaMax = None
 SIM.gun.thetaMin = None
 

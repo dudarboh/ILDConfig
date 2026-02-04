@@ -9,7 +9,7 @@ from Configurables import (
     AuditorSvc,
     AlgTimingAuditor,
 )
-from Gaudi.Configuration import INFO
+from Gaudi.Configuration import INFO, DEBUG
 from k4FWCore import ApplicationMgr, IOSvc
 from k4FWCore.parseArgs import parser
 from k4MarlinWrapper.parseConstants import parseConstants
@@ -169,6 +169,7 @@ CONSTANTS = {
 det_calib_constants = import_from(f"Calibration/Calibration_{det_model}.cfg").CONSTANTS
 CONSTANTS.update(det_calib_constants)
 
+
 parseConstants(CONSTANTS)
 
 
@@ -289,8 +290,11 @@ if reco_args.lcioOutput != "only":
     }
     algList.append(collPatcherRec)
 
-    output_commands = ["keep *"]
-    output_commands.extend(get_drop_collections(CONSTANTS, True))
+    output_commands = ["drop *"]
+    collections_to_keep = "MCParticles PandoraPFOs PandoraClusters LHCAL LCAL MUON EcalBarrelCollectionRec EcalBarrelCollectionGapHits EcalEndcapsCollectionRec EcalEndcapsCollectionGapHits EcalEndcapRingCollectionRec HcalBarrelCollectionRec HcalEndcapsCollectionRec HcalEndcapRingCollectionRec"
+    for name in collections_to_keep.split(" "):
+        output_commands.append(f"keep {name}")
+
     io_handler.add_edm4hep_writer(
         f"{reco_args.outputFileBase}_REC.edm4hep.root", output_commands
     )
@@ -346,7 +350,7 @@ svcList.append(auditorSvc)
 auditorSvc.Auditors = [AlgTimingAuditor()]
 
 app_mgr = ApplicationMgr(
-    TopAlg=algList, EvtSel="NONE", EvtMax=3, ExtSvc=svcList, OutputLevel=INFO
+    TopAlg=algList, EvtSel="NONE", EvtMax=-1, ExtSvc=svcList, OutputLevel=INFO
 )
 
 app_mgr.AuditAlgorithms = True

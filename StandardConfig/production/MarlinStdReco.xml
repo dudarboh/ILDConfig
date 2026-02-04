@@ -26,9 +26,9 @@
   <constants>
     <!-- ***** Global constant for reconstruction ***** -->
     <!-- The lcgeo directory where to look for the ILD model -->
-    <constant name="lcgeo_DIR" value="/path/to/k4geo_DIR" />
+    <constant name="lcgeo_DIR" value="/cvmfs/sw.hsf.org/key4hep/releases/2024-10-03/x86_64-almalinux9-gcc14.2.0-opt/k4geo/0.21-d5gbnd/share/k4geo" />
     <!-- ILD detector model -->
-    <constant name="DetectorModel" value="None_Please_specify_one" />
+    <constant name="DetectorModel" value="ILD_l5_o1_v02" />
     <!-- The full compact file name -->
     <constant name="CompactFile" value="${lcgeo_DIR}/ILD/compact/${DetectorModel}/${DetectorModel}.xml" />
     <!-- ILD calibration file -->
@@ -42,7 +42,7 @@
     <!-- The energy dependant parameters file to include -->
     <constant name="EnergyParametersFile" value="Config/Parameters${CMSEnergy}GeV.xml" />
     <!--Whether to run the BeamCal reconstruction-->
-    <constant name="RunBeamCalReco" value="true" />
+    <constant name="RunBeamCalReco" value="false" />
     <!--The BeamCal calibration constant, sim hit energy to calibrated calo hit energy-->
     <constant name="BeamCalCalibrationFactor">79.6</constant>
     
